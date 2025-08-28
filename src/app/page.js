@@ -13,9 +13,12 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import QrCodeDisplay from "@/components/QrCodeDisplay"; // <-- Re-import the QR component
+import AdminDashboard from "@/components/AdminDashboard"; // Import the new components
+// import UserTaskForm from "@/components/UserTaskForm";
+import UserDashboard from "@/components/UserDashboard"; 
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [baseUrl, setBaseUrl] = useState("");
   const [view, setView] = useState("initial");
 
@@ -84,26 +87,33 @@ export default function Home() {
   // --- JSX REMAINS THE SAME ---
   if (user) {
     return (
-      <main className='flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4'>
-        {" "}
-        <div className='bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center'>
-          {" "}
-          <h1 className='text-2xl font-bold mb-2'>Task Tracker</h1>{" "}
-          <p className='mb-6'>Welcome, {user.displayName || user.email}!</p>{" "}
-          <div className='bg-gray-200 p-10 rounded-lg'>
-            {" "}
-            <p className='text-gray-500'>
-              ✅ Login Complete! Application UI will be built here.
-            </p>{" "}
-          </div>{" "}
-          <button
-            onClick={handleSignOut}
-            className='w-full mt-6 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors'
-          >
-            {" "}
-            Sign Out{" "}
-          </button>{" "}
-        </div>{" "}
+      <main className='flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4'>
+        <div className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-8 rounded-lg shadow-md w-full max-w-2xl text-center'>
+          <div className='flex justify-between items-center mb-6'>
+            <h1 className='text-2xl font-bold'>Task Tracker</h1>
+            <button
+              onClick={handleSignOut}
+              className='bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors'
+            >
+              Sign Out
+            </button>
+          </div>
+
+          <p className='mb-6 text-left'>
+            Welcome,{" "}
+            <span className='font-semibold'>
+              {userProfile?.name || user.email}
+            </span>
+            ! Your role is:{" "}
+            <span className='font-semibold capitalize'>
+              {userProfile?.role}
+            </span>
+          </p>
+
+          {userProfile?.role === "admin" && <AdminDashboard />}
+          {/* {userProfile?.role === "user" && <UserTaskForm />} */}
+          {userProfile?.role === "user" && <UserDashboard />}
+        </div>
       </main>
     );
   }
