@@ -1,24 +1,24 @@
 // src/app/page.js
 "use client";
 
+import AdminDashboard from "@/components/AdminDashboard"; // Import the new components
+import QrCodeDisplay from "@/components/QrCodeDisplay"; // <-- Re-import the QR component
 import { useAuth } from "@/context/AuthContext";
 import { auth, db } from "@/lib/firebase";
 import {
-  signOut,
+  getRedirectResult,
   GoogleAuthProvider,
   OAuthProvider,
   signInWithPopup,
-  getRedirectResult, // <-- Import function to catch redirect users
+  signOut,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import QrCodeDisplay from "@/components/QrCodeDisplay"; // <-- Re-import the QR component
-import AdminDashboard from "@/components/AdminDashboard"; // Import the new components
 // import UserTaskForm from "@/components/UserTaskForm";
-import UserDashboard from "@/components/UserDashboard"; 
+import UserDashboard from "@/components/UserDashboard";
 
 export default function Home() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const [baseUrl, setBaseUrl] = useState("");
   const [view, setView] = useState("initial");
 
@@ -88,35 +88,45 @@ export default function Home() {
 
   // --- JSX REMAINS THE SAME ---
   if (user) {
+    if (loading) {
+      return (
+        <div className='flex min-h-screen flex-col items-center justify-center'>
+          <p>Loading user profile...</p>
+        </div>
+      );
+    }
     return (
-      <main className='flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4'>
-        <div className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-8 rounded-lg shadow-md w-full max-w-2xl text-center'>
-          <div className='flex justify-between items-center mb-6'>
-            <h1 className='text-2xl font-bold'>Task Tracker</h1>
+      <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+        <header className='bg-white dark:bg-gray-800 shadow-sm'>
+          <div className='max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center'>
+            <h1 className='text-xl font-bold text-gray-900 dark:text-white'>
+              Task Tracker
+            </h1>
             <button
               onClick={handleSignOut}
-              className='bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors'
+              className='text-sm font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300'
             >
               Sign Out
             </button>
           </div>
-
-          <p className='mb-6 text-left'>
-            Welcome,{" "}
-            <span className='font-semibold'>
-              {userProfile?.name || user.email}
-            </span>
-            ! Your role is:{" "}
-            <span className='font-semibold capitalize'>
-              {userProfile?.role}
-            </span>
-          </p>
-
-          {userProfile?.role === "admin" && <AdminDashboard />}
-          {/* {userProfile?.role === "user" && <UserTaskForm />} */}
-          {userProfile?.role === "user" && <UserDashboard />}
-        </div>
-      </main>
+        </header>
+        <main className='max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'>
+          <div className='px-4 py-6 sm:px-0'>
+            <p className='mb-6 text-gray-600 dark:text-gray-400'>
+              Welcome,{" "}
+              <span className='font-semibold text-gray-800 dark:text-gray-200'>
+                {userProfile?.name || user.email}
+              </span>
+              ! Your role is:{" "}
+              <span className='font-semibold capitalize text-gray-800 dark:text-gray-200'>
+                {userProfile?.role}
+              </span>
+            </p>
+            {userProfile?.role === "admin" && <AdminDashboard />}
+            {userProfile?.role === "user" && <UserDashboard />}
+          </div>
+        </main>
+      </div>
     );
   }
   return (

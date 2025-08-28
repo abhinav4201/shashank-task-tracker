@@ -6,9 +6,7 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {
-      // We are removing the custom 'colors' block from here
-    },
+    extend: {},
   },
   plugins: [],
 };

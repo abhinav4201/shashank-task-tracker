@@ -6,8 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
-// --- Define your Super Admin's email address here ---
-export const SUPER_ADMIN_EMAIL = "abhinav445.aa@gmail.com"; // IMPORTANT: Change this to your email
+export const SUPER_ADMIN_EMAIL = "abhinav445.aa@gmail.com"; // Your super admin email
 
 const AuthContext = createContext();
 
@@ -24,9 +23,6 @@ export const AuthProvider = ({ children }) => {
         const docSnap = await getDoc(userRef);
         if (docSnap.exists()) {
           const profileData = docSnap.data();
-
-          // SUPER ADMIN LOGIC: If the logged-in user is the super admin,
-          // forcefully set their role to 'admin' in the app state.
           if (user.email === SUPER_ADMIN_EMAIL) {
             profileData.role = "admin";
           }
@@ -34,11 +30,15 @@ export const AuthProvider = ({ children }) => {
         } else {
           setUserProfile(null);
         }
+        // --- THIS IS THE FIX ---
+        // We now set loading to false AFTER the profile is fetched.
+        setLoading(false);
       } else {
         setUser(null);
         setUserProfile(null);
+        // Also set loading to false if the user is signed out.
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -48,16 +48,11 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         userProfile,
+        loading,
         isSuperAdmin: user?.email === SUPER_ADMIN_EMAIL,
       }}
     >
-      {loading ? (
-        <div className='flex h-screen items-center justify-center'>
-          Loading...
-        </div>
-      ) : (
-        children
-      )}
+      {children}
     </AuthContext.Provider>
   );
 };
