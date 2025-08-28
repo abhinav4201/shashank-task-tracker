@@ -26,16 +26,18 @@ export default function Home() {
   const createUserProfile = async (user) => {
     if (!user) return;
     const userRef = doc(db, "users", user.uid);
-    await setDoc(
-      userRef,
-      {
+    const docSnap = await getDoc(userRef); // Check if the user document already exists
+
+    // If the document does NOT exist, create it with the default 'user' role.
+    if (!docSnap.exists()) {
+      await setDoc(userRef, {
         uid: user.uid,
         email: user.email,
         name: user.displayName,
-        role: "user",
-      },
-      { merge: true }
-    );
+        role: "user", // Assign 'user' role only on the very first sign-in
+      });
+    }
+    // If the document already exists, we do nothing, preserving their current role.
   };
 
   useEffect(() => {
